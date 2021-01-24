@@ -8,9 +8,9 @@ function [Yc, Uc] = mypca(X, num_dimensions)
 
     esort = diag(Sigmac);
 
-    figure;
-    plot(esort,'.','Markersize',20);
-    grid;
+%     figure;
+%     plot(esort,'.','Markersize',20);
+%     grid;
 
     Yc = Uc(:,1:num_dimensions)'*X;
 end
