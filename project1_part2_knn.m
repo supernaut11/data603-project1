@@ -26,15 +26,14 @@ num_dimensions = 100;
 
 %% Perform MDA
 % Create a matrix that contains image data in each column
-Xi = [];
+Yi_pca = [];
 for idx = 1:num_subjects
     for jdx = 1:num_poses
-        Xi(:,jdx,idx) = Y_pca(:,(idx-1)*num_poses+jdx);
+        Yi_pca(:,jdx,idx) = Y_pca(:,(idx-1)*num_poses+jdx);
     end
 end
 
-w = mymda(Xi);
-Y_mda = w'*Y_pca;
+Y_mda = mymda(Y_pca, Yi_pca);
 
 % Split up PCA+MDA data by class to make KNN easier
 Yi_mda = [];

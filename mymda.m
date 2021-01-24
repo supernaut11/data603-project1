@@ -1,53 +1,48 @@
-function [w] = mymda(Xi)
-    [~,num_poses,num_subjects] = size(Xi);
+function [Y_mda] = mymda(X_all, Xi)
+    [dimension,num_poses,num_subjects] = size(Xi);
 
     % Compute the mean for each subject
-    Xi_mu = [];
+    class_mean = zeros(dimension,1,num_subjects);
     for idx = 1:num_subjects
-        Xi_mu(:,1,idx) = mean(Xi(:,:,idx),2);
+        class_mean(:,1,idx) = mean(Xi(:,:,idx),2);
     end
 
     % figure;
     % colormap gray;
     % imagesc(reshape(Xi_mu(:,:,1), [d1 d2]));
 
-    Xi_centered = [];
+    class_centered = zeros(dimension,num_poses,num_subjects);
     for idx = 1:num_subjects
-        Xi_centered(:,:,idx) = Xi(:,:,idx) - Xi_mu(:,:,idx);
+        class_centered(:,:,idx) = Xi(:,:,idx) - class_mean(:,:,idx);
     end
 
-    Sw_i = [];
+    class_scatter = zeros(dimension,dimension,num_subjects);
     % Compute the scatter matrix for each subject
     for idx = 1:num_subjects
-        curX = Xi_centered(:,:,idx);
-        Sw_i(:,:,idx) = curX*curX';
+        curX = class_centered(:,:,idx);
+        class_scatter(:,:,idx) = curX*curX';
     end
 
     figure;
-    imagesc(Sw_i(:,:,1));
+    imagesc(class_scatter(:,:,1));
     colorbar;
 
-    Sw = sum(Sw_i,3);
+    Sw = sum(class_scatter,3);
 
     figure;
     imagesc(Sw(:,:,1));
     colorbar;
-
-    %Sb_i = zeros(d1*d2, d1*d2, num_subjects);
-    Sb_i = [];
-    total_mean = sum(num_poses*Xi_mu,3)/(num_poses*num_subjects);
-
-    for idx = 1:num_subjects
-        m_i = Xi_mu(:,:,idx);
-
-        Sb_i(:,:,idx) = num_poses*(m_i-total_mean)*(m_i-total_mean)';
-    end
-
-    Sb = sum(Sb_i,3);
+    
+%%
+    total_mean = mean(X_all,2);
+    total_centered = X_all-total_mean;
+    Stotal = total_centered*total_centered';
+    Sb = Stotal - Sw;
 
     %% Solve generalized eigenvalue problem to come up with MDA projection
     [evec, eval] = eig(Sb, Sw);
     [esort, isort] = sort(diag(eval), 'descend');
     evec = evec(:,isort);
     w = evec(:,1:num_subjects-1);
+    Y_mda = w'*X_all;
 end
