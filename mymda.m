@@ -23,25 +23,16 @@ function [Y_mda] = mymda(X_all, Xi)
         class_scatter(:,:,idx) = curX*curX';
     end
 
-    figure;
-    imagesc(class_scatter(:,:,1));
-    colorbar;
-
     Sw = sum(class_scatter,3);
-
-    figure;
-    imagesc(Sw(:,:,1));
-    colorbar;
     
-%%
     total_mean = mean(X_all,2);
     total_centered = X_all-total_mean;
     Stotal = total_centered*total_centered';
     Sb = Stotal - Sw;
 
-    %% Solve generalized eigenvalue problem to come up with MDA projection
+    % Solve generalized eigenvalue problem to come up with MDA projection
     [evec, eval] = eig(Sb, Sw);
-    [esort, isort] = sort(diag(eval), 'descend');
+    [~, isort] = sort(diag(eval), 'descend');
     evec = evec(:,isort);
     w = evec(:,1:num_subjects-1);
     Y_mda = w'*X_all;

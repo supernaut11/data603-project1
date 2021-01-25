@@ -1,3 +1,4 @@
+function [g_correct, g_wrong] = project1_part2(num_pca_dimensions, num_train)
 %% Load data
 % Load the data set
 data = load('pose.mat');
@@ -24,11 +25,10 @@ end
 % end
 
 %% Perform PCA
-num_dimensions = 20;
-[Y_pca, Uc] = mypca(X_all, num_dimensions);
+[Y_pca, ~] = mypca(X_all, num_pca_dimensions);
 
 %% Perform MDA
-[d1,d2,num_poses,num_subjects] = size(pca_pose);
+[~,~,num_poses,num_subjects] = size(pca_pose);
 
 % Create a matrix that contains image data in each column
 Yi_pca = [];
@@ -51,7 +51,6 @@ for idx = 1:num_subjects
 end
 
 %% Split data into training and test sets
-num_train = 10;
 num_test = num_poses - num_train;
 Yi_mda_train = [];
 Yi_mda_test = [];
@@ -70,7 +69,8 @@ for idx = 1:num_subjects
 end
 
 %% Test the accuracy of the Gaussian classifier
-num_correct = 0;
+g_correct = 0;
+g_wrong = 0;
 
 for idx = 1:num_subjects
     num_class_correct = 0;
@@ -84,8 +84,10 @@ for idx = 1:num_subjects
         [M,I] = max(gauss_results);
         
         if I(1) == idx
-            num_correct = num_correct + 1;
+            g_correct = g_correct + 1;
             num_class_correct = num_class_correct + 1;
+        else
+            g_wrong = g_wrong + 1;
         end
     end
     
@@ -96,6 +98,6 @@ end
 
 fprintf("TOTAL RESULTS\n");
 fprintf("=============\n");
-fprintf("classified %d correctly\n", num_correct);
+fprintf("classified %d correctly\nclassified %d incorrectly\n", g_correct, g_wrong);
 
 %% Perform KNN classification
